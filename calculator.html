@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alcohol Consumption Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #total-drinks, #bac {
+            font-size: 20px;
+            font-weight: bold;
+            color: #d9534f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Alcohol Consumption Calculator</h1>
+        <form id="alcohol-form">
+            <label for="alcohol-type">Select Alcohol Type:</label>
+            <select id="alcohol-type" onchange="updateUnits()">
+                <option value="beer">Beer (5% ABV)</option>
+                <option value="wine">Wine (12% ABV)</option>
+                <option value="vodka">Vodka (40% ABV)</option>
+                <option value="whiskey">Whiskey (40% ABV)</option>
+                <option value="rum">Rum (40% ABV)</option>
+                <option value="tequila">Tequila (40% ABV)</option>
+            </select>
+
+            <label for="amount">Enter Amount:</label>
+            <input type="number" id="amount" placeholder="Enter amount">
+
+            <label for="unit">Unit:</label>
+            <select id="unit">
+            </select>
+
+            <label for="weight">Enter Weight (pounds):</label>
+            <input type="number" id="weight" placeholder="Enter weight">
+
+            <label for="hours">Hours Since Drinking Started:</label>
+            <input type="number" id="hours" placeholder="Enter hours">
+
+            <label for="gender">Select Gender:</label>
+            <select id="gender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+            </select>
+
+            <button type="button" id="calculate-button">Calculate</button>
+        </form>
+
+        <div id="result">
+            <h2>Actual Alcohol Drank: <span id="total-drinks">0</span> ml</h2>
+            <h2>BAC: <span id="bac">0</span>%</h2>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('calculate-button').addEventListener('click', calculateDrinks);
+
+        function updateUnits() {
+            const alcoholType = document.getElementById('alcohol-type').value;
+            const unitSelect = document.getElementById('unit');
+            unitSelect.innerHTML = '';
+
+            const unitOptions = {
+                beer: ['mL', 'Cans', 'Bottles'],
+                wine: ['mL', 'Glasses'],
+                vodka: ['mL', 'Shots'],
+                whiskey: ['mL', 'Shots'],
+                rum: ['mL', 'Shots'],
+                tequila: ['mL', 'Shots']
+            };
+
+            unitOptions[alcoholType].forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit;
+                option.textContent = unit;
+                unitSelect.appendChild(option);
+            });
+        }
+
+        function calculateDrinks() {
+            const alcoholType = document.getElementById('alcohol-type').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const unit = document.getElementById('unit').value;
+            const weight = parseFloat(document.getElementById('weight').value);
+            const hours = parseFloat(document.getElementById('hours').value);
+            const gender = document.getElementById('gender').value;
+
+            const abvValues = {
+                beer: 5,
+                wine: 12,
+                vodka: 40,
+                whiskey: 40,
+                rum: 40,
+                tequila: 40
+            };
+
+            const unitConversions = {
+                Cans: 355,   // average can of beer is 355 ml
+                Glasses: 150, // average glass of wine is 150 ml
+                Shots: 44,    // average shot is 44 ml
+                Bottles: 355  // average beer bottle is 355 ml too
+            };
+
+            let amountInMl = unit.toLowerCase() === 'ml' ? amount : amount * unitConversions[unit];
+            const alcoholContent = (amountInMl * abvValues[alcoholType]) / 100;
+            document.getElementById('total-drinks').textContent = alcoholContent.toFixed(2);
+
+            const alcoholInOunces = alcoholContent * 0.033814;
+            const r = gender === 'male' ? 0.73 : 0.66;
+            const bac = (alcoholInOunces * 5.14 / (weight * r)) - (0.015 * hours);
+            document.getElementById('bac').textContent = bac.toFixed(3);
+        }
+
+        // Initialize units for the default selected alcohol type
+        updateUnits();
+    </script>
+</body>
+</html>
